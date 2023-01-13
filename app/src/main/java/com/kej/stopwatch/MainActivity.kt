@@ -38,6 +38,8 @@ class MainActivity : AppCompatActivity() {
         binding.stopButton.setOnClickListener {
             showStopAlertDialog()
         }
+
+        binding.countDownProgressBar.progress = 100
     }
 
     private fun showTimePickerAlertDialog() {
@@ -79,8 +81,10 @@ class MainActivity : AppCompatActivity() {
             } else {
                 countDownDeciSecond -= 1
                 val second = countDownDeciSecond / 10
+                val progress = (second / countDownSecond.toFloat()) * 100
                 runOnUiThread {
                     binding.countDownTextView.text = String.format("%02d", second)
+                    binding.countDownProgressBar.progress = progress.toInt()
                 }
             }
 

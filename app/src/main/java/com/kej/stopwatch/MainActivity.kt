@@ -11,7 +11,8 @@ import kotlin.concurrent.timer
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private var countDownSecond = 10
+    private var countDownSecond = 0
+    private var countDownDeciSecond = 0
     private var currentDeciSecond = 0
     private var timer: Timer? = null
     private var isActive = false
@@ -40,27 +41,29 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showTimePickerAlertDialog() {
+        val dialogBinding = DialogTimePickerBinding.inflate(layoutInflater)
+        dialogBinding.numberPicker.apply {
+            maxValue = 30
+            minValue = 0
+            value = countDownSecond
+        }
+
         AlertDialog.Builder(this).apply {
-            val dialogBinding = DialogTimePickerBinding.inflate(layoutInflater)
-            dialogBinding.numberPicker.apply {
-                maxValue = 30
-                minValue = 0
-                value = countDownSecond
-            }
             setTitle("카운트 다운 설정")
             setPositiveButton("확인") { _, _ ->
                 countDownSecond = dialogBinding.numberPicker.value
+                countDownDeciSecond = countDownSecond * 10
                 binding.countDownTextView.text = String.format("%02d", countDownSecond)
             }
             setNegativeButton("취소", null)
-            setView(binding.root)
+            setView(dialogBinding.root)
         }.show()
     }
 
     private fun start() {
         isActive = true
         timer = timer(initialDelay = 0, period = 100) {
-            if (countDownSecond == 0) {
+            if (countDownDeciSecond == 0) {
                 currentDeciSecond += 1
 
                 val minute = currentDeciSecond.div(10) / 60
@@ -74,9 +77,10 @@ class MainActivity : AppCompatActivity() {
                     binding.tickTextView.text = tick.toString()
                 }
             } else {
-                countDownSecond -= 1
+                countDownDeciSecond -= 1
+                val second = countDownDeciSecond / 10
                 runOnUiThread {
-                    binding.countDownTextView.text = String.format("%02d", countDownSecond)
+                    binding.countDownTextView.text = String.format("%02d", second)
                 }
             }
 

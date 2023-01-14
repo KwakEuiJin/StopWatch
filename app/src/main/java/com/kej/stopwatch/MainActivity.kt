@@ -2,8 +2,11 @@ package com.kej.stopwatch
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+import android.media.AudioManager
+import android.media.ToneGenerator
 import android.os.Bundle
 import android.view.Gravity
+import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -108,6 +111,7 @@ class MainActivity : AppCompatActivity() {
                 currentDeciSecond += 1
                 val (tick, timeText) = getTimeText()
                 runOnUiThread {
+                    binding.group.visibility = View.GONE
                     binding.mainSecondTextView.text = timeText
                     binding.tickTextView.text = tick.toString()
                 }
@@ -119,6 +123,15 @@ class MainActivity : AppCompatActivity() {
                     binding.countDownTextView.text = String.format("%02d", second)
                     binding.countDownProgressBar.progress = progress.toInt()
                 }
+            }
+
+            if (currentDeciSecond == 0 && countDownDeciSecond < 31 && countDownDeciSecond % 10 == 0) {
+                val toneType = if (countDownDeciSecond == 0) {
+                    ToneGenerator.TONE_CDMA_HIGH_L
+                } else {
+                    ToneGenerator.TONE_CDMA_ANSWER
+                }
+                ToneGenerator(AudioManager.STREAM_ALARM, ToneGenerator.MAX_VOLUME).startTone(toneType, 100)
             }
 
         }
@@ -144,11 +157,17 @@ class MainActivity : AppCompatActivity() {
         currentDeciSecond = 0
         binding.mainSecondTextView.text = "00:00"
         binding.tickTextView.text = "0"
+        binding.group.visibility = View.VISIBLE
+        binding.containerLayout.removeAllViews()
     }
 
 
     @SuppressLint("SetTextI18n")
     private fun lap() {
+        if (!isActive) {
+            return
+        }
+
         binding.containerLayout.apply {
             TextView(this@MainActivity).apply {
                 gravity = Gravity.CENTER
